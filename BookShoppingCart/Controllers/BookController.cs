@@ -109,7 +109,7 @@ namespace BookShoppingCart.Controllers
                 };
                 await _bookRepo.AddBook(book);
                 TempData["successMessage"] = "Book is added successfully";
-                return RedirectToAction(nameof(AddBook));
+                return RedirectToAction(nameof(Index));
             }
             catch (InvalidOperationException ex)
             {
