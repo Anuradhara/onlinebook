@@ -1,7 +1,6 @@
 Book Shopping Cart
 
 
-Overview
 The Book Shopping Cart is a web application built with ASP.NET Core MVC that allows users to browse, search, and purchase books online.
 The application includes user authentication, product listings, shopping cart functionality, and a checkout process.
 
