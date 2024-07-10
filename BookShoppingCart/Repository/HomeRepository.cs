@@ -1,0 +1,56 @@
+﻿
+using Microsoft.EntityFrameworkCore;
+
+namespace BookShoppingCart.Repository
+{
+    public class HomeRepository : IHomeRepository 
+    {
+        private readonly ApplicationDbContext _db;
+
+        public HomeRepository(ApplicationDbContext db)
+        {
+            _db = db;
+        }
+        public async Task<IEnumerable<Genre>> Genres()
+        {
+            return await _db.Genres.ToListAsync();
+        }
+
+        public async Task<(IEnumerable<Book> Books, int TotalCount)> GetBooks(string sTerm = "", int genreId = 0, int pageNumber = 1, int pageSize = 9)
+        {
+            sTerm = sTerm.ToLower();
+
+            var query = from book in _db.Books
+                        join genre in _db.Genres on book.GenreId equals genre.Id
+                        join stock in _db.Stocks on book.Id equals stock.BookId into book_stocks
+                        from bookWithStock in book_stocks.DefaultIfEmpty()
+                        where string.IsNullOrWhiteSpace(sTerm) || (book != null && book.BookName.ToLower().Contains(sTerm))
+                        select new Book
+                        {
+                            Id = book.Id,
+                            Image = book.Image,
+                            AuthorName = book.AuthorName,
+                            BookName = book.BookName,
+                            GenreId = book.GenreId,
+                            Price = book.Price,
+                            GenreName = genre.GenreName,
+                            Quantity = bookWithStock == null ? 0 : bookWithStock.Quantity
+                        };
+
+            if (genreId > 0)
+            {
+                query = query.Where(a => a.GenreId == genreId);
+            }
+
+            var totalBooks = await query.CountAsync();
+
+            var books = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (books, totalBooks);
+        }
+
+    }
+}

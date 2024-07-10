@@ -1,0 +1,95 @@
+﻿@model BookDisplayModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<h2>Books</h2>
+<div>
+    <a asp-action="AddBook" asp-controller="Book" class="btn btn-primary">Add More</a>
+    <form asp-action="SearchBooks" method="post" class="row mt-4">
+        <div class="col-12">
+            <div class="input-group">
+                <label class="visually-hidden" for="sterm">Search by title</label>
+                <input type="text" value="@Model.STerm" id="sterm" name="sterm" placeholder="Search by title" class="form-control">
+                <div class="input-group-append mx-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <a href="/Book/Index" class="btn btn-dark">Reset</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.Books.Any())
+    {
+        <table class="table table-striped my-2 ">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Book</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var book in Model.Books)
+                {
+                    <tr>
+                        <td>
+                            @if (string.IsNullOrWhiteSpace(book.Image))
+                            {
+                                <img src="/Images/NoImage.png" style="width:80px;height:100%" alt="book image" />
+                            }
+                            else
+                            {
+                                <img src="/images/@book.Image" style="width:80px;height:100%" alt="book image" />
+                            }
+                        </td>
+                        <td>@book.BookName</td>
+                        <td>@book.AuthorName</td>
+                        <td>@book.Genre.GenreName</td>
+                        <td>@book.Price</td>
+                        <td>
+                            <a asp-action="UpdateBook" asp-controller="Book" asp-route-id="@book.Id" class="btn btn-success">Edit</a>
+                            <a asp-action="DeleteBook" asp-controller="Book" asp-route-id="@book.Id" class="btn btn-danger" onclick="return window.confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                @if (Model.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { sterm = Model.STerm, genreId = Model.GenreId, pageNumber = Model.CurrentPage - 1 })">
+                            Previous
+                        </a>
+                    </li>
+                }
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { sterm = Model.STerm, genreId = Model.GenreId, pageNumber = i })">@i</a>
+                    </li>
+                }
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { sterm = Model.STerm, genreId = Model.GenreId, pageNumber = Model.CurrentPage + 1 })">Next</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+    else
+    {
+        <h3>No records</h3>
+    }
+   
+</div>
+
